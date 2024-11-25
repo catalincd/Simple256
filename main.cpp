@@ -11,16 +11,7 @@
 
 
 int main(int argc, char** argv)
-{
-    std::string enced = encrypt_cbc("aea46ae075e34edf3d2aac5faa41a6d5", "aea46ae075e34edf3d2aac5faa41a6d5", 32);
-
-    char* outDec = new char[enced.length()];
-    memcpy(outDec, enced.c_str(), enced.length());
-
-    std::string deced = decrypt_cbc(outDec, "aea46ae075e34edf3d2aac5faa41a6d5", enced.length());
-    std::cout << enced << std::endl;
-    std::cout << deced << std::endl;
-
+{  
     // This is really not what it should be, has to be rewritten sometime
     if(argc < 4)
     {
@@ -39,6 +30,8 @@ int main(int argc, char** argv)
         char key[strlen(argv[3])];
         memcpy(key, argv[3], strlen(argv[3]));
 
+        // TO DO: PADDING
+
         if(strlen(argv[2]) != 32)
         {
             std::cout << "Key length must be 32\n";
@@ -51,7 +44,8 @@ int main(int argc, char** argv)
             exit(0);
         }
 
-        std::cout << encrypt_cbc(data, key, strlen(argv[2])) << std::endl;
+        encrypt_cbc(data, key, strlen(argv[2]));
+        std::cout << data << std::endl;
     }
 
     if(!strcmp(argv[1], "-d"))
@@ -74,7 +68,8 @@ int main(int argc, char** argv)
             exit(0);
         }
 
-        std::cout << decrypt_cbc(data, key, strlen(argv[2])) << std::endl;
+        encrypt_cbc(data, key, strlen(argv[2]));
+        std::cout << data << std::endl;
     }
 
     return 0;

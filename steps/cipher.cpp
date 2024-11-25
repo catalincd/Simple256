@@ -1,17 +1,27 @@
 #include "cipher.h"
 
+#define ROUNDS 4
+
 void encrypt(uchar* data, uchar* key)
 {
-    encrypt_substitution(data, key);
-    encrypt_permutation(data, key);
+    for(int i=0;i<ROUNDS;i++)
+    {
+        encrypt_substitution(data, key);
+        encrypt_permutation(data, key);
+    }
+
     encrypt_vigenere(data, key);
 }
 
 void decrypt(uchar* data, uchar* key)
 {
     decrypt_vigenere(data, key);
-    decrypt_permutation(data, key);
-    decrypt_substitution(data, key);
+
+    for(int i=0;i<ROUNDS;i++)
+    {
+        decrypt_permutation(data, key);
+        decrypt_substitution(data, key);
+    }
 }
 
 void encrypt(char* data, char* key)
@@ -24,73 +34,69 @@ void decrypt(char* data, char* key)
     decrypt(reinterpret_cast<uchar*>(data), reinterpret_cast<uchar*>(key));
 }
 
-
-// TO DO: PADDING
-
-std::string encrypt_cbc(char* data, char* key, int len)
+void printBytes(uchar* c, std::string msg = "", int _size = SIZE)
 {
-    int current = 0;
-    std::string result = keygen(32);
-    std::string last = result; //iv
-    
-    std::string temp;
-    temp.reserve(32);
-
-    while(len > 0)
+    std::cout << msg << std::hex;
+    for(int i=0;i<_size;i++)
     {
-        int target = (len < 32? len : 32);
-        for(int i=0;i<target;i++)
-        {
-            temp = data[current + i] ^ last[i];
-        }
+        std::cout << std::uppercase << std::hex << (int)c[i] << std::dec << ' ';
+    }
+    std::cout << '\n';
+}
 
-        char payload[32];
-        strcpy(payload, temp.c_str());
-        encrypt(payload, key);
-        result += std::string(payload);
+uchar* _encrypt_cbc(uchar* data, uchar* key, int len)
+{
+    std::string iv = keygen(32);
+
+    uchar* result = new uchar[len + 32];
+    uchar* last = new uchar[32]; 
+
+    memcpy(last, iv.c_str(), 32);
+    memcpy(result, iv.c_str(), 32);
+
+    int current = 32;
+
+    while(current < len + 32)
+    {
+        for(int i=0;i<32;i++)
+        {
+            last[i] ^= data[i + current - 32];
+        }
         
-        last = temp;
+        encrypt(last, key);
+        memcpy(result + current, last, 32);
         current += 32;
-        len -= 32;
     }
 
+    delete[] last;
     return result;
 }
 
-std::string decrypt_cbc(char* data, char* key, int len)
+uchar* _decrypt_cbc(uchar* data, uchar* key, int len)
 {
+    uchar* result = new uchar[len - 32];
+    uchar* last = new uchar[32]; 
+    uchar* block = new uchar[32]; 
+
+    memcpy(last, data, 32); // iv
     int current = 32;
-    len -= 32;
-    std::string tempData(data);
 
-    std::string result = "";
-    std::string last = tempData.substr(0, 32); //iv
-   
-    while(len > 0)
+    while(current < len)
     {
-        int target = (len < 32? len : 32);
-
-        std::string temp = tempData.substr(current, current + 32);
-        
-        char* payload = new char[32];
-        memcpy(payload, temp.c_str(), 32);
-        decrypt(payload, key);
-        temp = std::string(payload);
-
-        
+        memcpy(block, data + current, 32);
+        decrypt(block, key);
 
         for(int i=0;i<32;i++)
         {
-            temp[i] ^= last[i];
+            block[i] ^= last[i];
         }
 
-        result += temp;
-        
-        last = temp; // to do
+        memcpy(last, data + current, 32);
+        memcpy(result + current - 32, block, 32);
         current += 32;
-        len -= 32;
-        delete[] payload;
     }
 
+    delete[] last;
+    delete[] block;
     return result;
 }
