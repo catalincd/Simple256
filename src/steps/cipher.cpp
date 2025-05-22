@@ -74,6 +74,9 @@ uchar* _encrypt_cbc(uchar* data, uchar* key, int len)
 
 uchar* _decrypt_cbc(uchar* data, uchar* key, int len)
 {
+    std::cout << "DATA: " << data << std::endl;
+    std::cout << "key: " << key << std::endl;
+
     uchar* result = new uchar[len - 32];
     uchar* last = new uchar[32]; 
     uchar* block = new uchar[32]; 

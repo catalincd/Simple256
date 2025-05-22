@@ -15,15 +15,15 @@ uchar* _decrypt_cbc(uchar* data, uchar* key, int len);
 
 
 template <typename T, typename K>
-uchar* encrypt_cbc(T* data, K* key, int len)
+uchar* encrypt_cbc(const T* data, const K* key, int len)
 {
-    uchar* p_data = reinterpret_cast<uchar*>(data);
-    uchar* p_key = reinterpret_cast<uchar*>(key);
+    uchar* p_data = reinterpret_cast<uchar*>(const_cast<char*>(data));
+    uchar* p_key = reinterpret_cast<uchar*>(const_cast<char*>(key));
     return _encrypt_cbc(p_data, p_key, len);
 }
 
 template <typename T, typename K>
-uchar* decrypt_cbc(T* data, K* key, int len)
+uchar* decrypt_cbc(const T* data, const K* key, int len)
 {
-    return _decrypt_cbc(reinterpret_cast<uchar*>(data), reinterpret_cast<uchar*>(key), len);
+    return _decrypt_cbc(reinterpret_cast<uchar*>(const_cast<char*>(data)), reinterpret_cast<uchar*>(const_cast<char*>(key)), len);
 }
