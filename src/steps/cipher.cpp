@@ -46,13 +46,18 @@ void printBytes(uchar* c, std::string msg = "", int _size = SIZE)
 
 uchar* _encrypt_cbc(uchar* data, uchar* key, int len)
 {
-    std::string iv = keygen(32);
+    uchar* iv = new uchar[32]; 
+    memcpy(iv, keygen(32).c_str(), 32);
+    return _encrypt_cbc(data, key, iv, 32);
+}
 
+uchar* _encrypt_cbc(uchar* data, uchar* key, uchar* iv, int len)
+{
     uchar* result = new uchar[len + 32];
     uchar* last = new uchar[32]; 
 
-    memcpy(last, iv.c_str(), 32);
-    memcpy(result, iv.c_str(), 32);
+    memcpy(last, iv, 32);
+    memcpy(result, iv, 32);
 
     int current = 32;
 
@@ -69,14 +74,12 @@ uchar* _encrypt_cbc(uchar* data, uchar* key, int len)
     }
 
     delete[] last;
+    //delete[] iv;
     return result;
 }
 
 uchar* _decrypt_cbc(uchar* data, uchar* key, int len)
 {
-    std::cout << "DATA: " << data << std::endl;
-    std::cout << "key: " << key << std::endl;
-
     uchar* result = new uchar[len - 32];
     uchar* last = new uchar[32]; 
     uchar* block = new uchar[32]; 

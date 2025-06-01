@@ -10,7 +10,9 @@ void decrypt(uchar* data, uchar* key);
 void encrypt(char* data, char* key);
 void decrypt(char* data, char* key);
 
+uchar* _encrypt_cbc(uchar* data, uchar* key, uchar* iv, int len);
 uchar* _encrypt_cbc(uchar* data, uchar* key, int len);
+
 uchar* _decrypt_cbc(uchar* data, uchar* key, int len);
 
 
@@ -20,6 +22,15 @@ uchar* encrypt_cbc(const T* data, const K* key, int len)
     uchar* p_data = reinterpret_cast<uchar*>(const_cast<char*>(data));
     uchar* p_key = reinterpret_cast<uchar*>(const_cast<char*>(key));
     return _encrypt_cbc(p_data, p_key, len);
+}
+
+template <typename T, typename K>
+uchar* encrypt_cbc(const T* data, const K* key, const K* iv, int len)
+{
+    uchar* p_data = reinterpret_cast<uchar*>(const_cast<char*>(data));
+    uchar* p_key = reinterpret_cast<uchar*>(const_cast<char*>(key));
+    uchar* p_iv = reinterpret_cast<uchar*>(const_cast<char*>(iv));
+    return _encrypt_cbc(p_data, p_key, p_iv, len);
 }
 
 template <typename T, typename K>
